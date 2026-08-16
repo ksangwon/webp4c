@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h3>게시글 목록</h3>
+    <table border="1" width="600">
+        <thead>
+            <tr>
+                <th>번호</th>
+                <th>제목</th>
+                <th>작성자</th>
+                <th>작성일</th>
+                <th>내용</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for post in posts %}
+            <tr align="center">
+                <td>{{ loop.index }}</td>
+                <td>{{ post.title }}</td>
+                <td>{{ post.username }}</td>
+                <td>{{ post.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                <td><a href="{{ url_for('read', id=post.id) }}">보기</a></td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="5" align="center">아직 등록된 게시글이 없습니다.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

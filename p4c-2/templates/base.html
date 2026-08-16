@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>P4C Web-2</title>
+</head>
+<body>
+    <header>
+        <h2><a href="{{ url_for('index') }}" style="text-decoration: none; color: black;">P4C Web-2 게시판 페이지</a></h2>
+        <nav>
+            {% if session.get('user_id') %}
+                <b>{{ session.get('username') }}</b>님 환영합니다! |
+                <a href="{{ url_for('write') }}">글쓰기</a> |
+                <a href="{{ url_for('logout') }}">로그아웃</a> |
+                <form action="{{ url_for('resign') }}" method="POST" style="display: inline;">
+                    <button type="submit" onclick="return confirm('정말 탈퇴하시겠습니까?')">회원탈퇴</button>
+                </form>
+            {% else %}
+                <a href="{{ url_for('login') }}">로그인</a> |
+                <a href="{{ url_for('signup') }}">회원가입</a>
+            {% endif %}
+        </nav>
+    </header>
+    <hr>
+
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <script>
+                {% for message in messages %}
+                    alert("{{ message }}")
+                {% endfor %}
+            </script>
+        {% endif %}
+    {% endwith %}
+
+    <main>
+        {% block content %}
+        {% endblock %}
+    </main>
+</body>
+</html>
