@@ -1,16 +1,18 @@
 from flask import Flask, render_template, request, redirect, url_for, session, flash 
-import pymysql
+import pymysql, os
 from werkzeug.security import generate_password_hash, check_password_hash
+from dotenv import load_dotenv
 
+load_dotenv()
 app = Flask(__name__)
-app.secret_key = 'secretkey'
+app.secret_key = os.environ.get('SECRET_KEY')
 
 # DB 연결 함수
 def db_connect():
     return pymysql.connect(
         host='127.0.0.1', 
         user='root',
-        password='1234',
+        password=os.environ.get('DB_PASSWORD'),
         database='P4C_2_DB',
         charset='utf8mb4',
         cursorclass=pymysql.cursors.DictCursor
