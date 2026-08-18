@@ -18,7 +18,13 @@
                 <td>{{ loop.index }}</td>
                 <td>{{ post.title }}</td>
                 <td>{{ post.username }}</td>
-                <td>{{ post.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                <td>{{ post.created_at.strftime('%Y-%m-%d %H:%M') }}
+                    {% if post.created_at != post.updated_at %}
+                        <span style="color:gray; font-size: 0.8em;">
+                            (수정됨)
+                        </span>
+                    {% endif %}
+                </td>
                 <td><a href="{{ url_for('read', id=post.id) }}">보기</a></td>
             </tr>
             {% else %}

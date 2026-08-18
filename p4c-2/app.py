@@ -25,7 +25,7 @@ def index():
     conn = db_connect()
     curs = conn.cursor()
     sql = """
-        SELECT p.id, p.title, u.username, p.created_at FROM posts p JOIN users u ON p.user_id = u.id ORDER BY p.id DESC
+        SELECT p.id, p.title, u.username, p.created_at, p.updated_at FROM posts p JOIN users u ON p.user_id = u.id ORDER BY p.id DESC
     """
     curs.execute(sql)
     posts = curs.fetchall()
@@ -122,7 +122,7 @@ def read(id):
     conn = db_connect()
     cursor = conn.cursor()
     sql = """
-        SELECT p.id, p.title, p.content, p.created_at, u.username, p.user_id 
+        SELECT * 
         FROM posts p JOIN users u ON p.user_id = u.id 
         WHERE p.id = %s
     """
@@ -135,6 +135,37 @@ def read(id):
         return redirect(url_for('index'))
 
     return render_template('read.html', post=post)
+
+# 게시글 수정
+@app.route('/modify/<int:id>', methods=['GET','POST'])
+def modify(id):
+    if 'user_id' not in session:
+        flash("로그인이 필요합니다.")
+        return redirect(url_for('login'))
+
+    conn = db_connect()
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT * FROM posts WHERE id = %s", (id,))
+    post = cursor.fetchone()
+
+    if not post or post['user_id'] != session['user_id']:
+        flash("권한이 없거나 존재하지 않는 게시물입니다.")
+        conn.close()
+        return redirect(url_for('index'))
+
+    if request.method == 'POST':
+        title = request.form['title']
+        content = request.form['content']
+
+        sql = "UPDATE posts SET title = %s, content = %s WHERE id = %s"
+        cursor.execute(sql, (title, content, id))
+        conn.commit()
+        conn.close()
+        return redirect(url_for('read', id=id))
+    conn.close()
+    return render_template('modify.html', post=post)
+
 
 
 # 게시글 삭제
