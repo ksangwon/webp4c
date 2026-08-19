@@ -1,7 +1,18 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <h3>게시글 목록</h3>
+    <div style="display: flex; justify-content: space-between; align-items: center;margin-bottom: 15px;" >
+        <h3 style="margin: 0;">게시글 목록</h3>
+        <form action="{{ url_for('index') }}" method="GET" style="margin: 0;">
+            <select name="search_type" style="padding: 5px;">
+                <option value="all" {% if search_type == 'all' %}selected{% endif %}>전체 (제목+내용)</option>
+                <option value="title" {% if search_type == 'title' %}selected{% endif %}>제목</option>
+                <option value="content" {% if search_type == 'content' %}selected{% endif %}>내용</option>
+            </select>
+            <input type="text" name="keyword" value="{{ keyword }}" placeholder="검색할 내용 입력" style="padding: 5px; width: 200px; ">
+            <button type="submit" style="padding: 5px 10px;">검색</button>
+        </form>
+    </div>
     <table border="1" width="600">
         <thead>
             <tr>
@@ -29,7 +40,12 @@
             </tr>
             {% else %}
             <tr>
-                <td colspan="5" align="center">아직 등록된 게시글이 없습니다.</td>
+                {% if keyword %}
+                    <td colspan="5" align="center">'{{ keyword }}'에 대한 조회된 글이 없습니다.
+                    </td>
+                {% else %}
+                    <td colspan="5" align="center">아직 등록된 게시글이 없습니다.</td>
+                {% endif %}
             </tr>
             {% endfor %}
         </tbody>

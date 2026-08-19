@@ -24,14 +24,33 @@ def db_connect():
 def index():
     conn = db_connect()
     curs = conn.cursor()
-    sql = """
-        SELECT p.id, p.title, u.username, p.created_at, p.updated_at FROM posts p JOIN users u ON p.user_id = u.id ORDER BY p.id DESC
+
+    keyword = request.args.get('keyword', '')
+    search_type = request.args.get('search_type', 'all')
+
+    common_sql = """
+        SELECT p.id, p.title, u.username, p.created_at, p.updated_at FROM posts p JOIN users u ON p.user_id = u.id 
     """
-    curs.execute(sql)
+
+    if keyword:
+        search_word = f"%{keyword}%"
+        if search_type == 'title':
+            sql = common_sql + "WHERE p.title LIKE %s ORDER BY p.id DESC"
+            curs.execute(sql, (search_word,))
+        elif search_type == 'content':
+            sql = common_sql + "WHERE p.content LIKE %s ORDER BY p.id DESC"
+            curs.execute(sql, (search_word, ))
+        else:
+            sql = common_sql + "WHERE p.title LIKE %s OR p.content LIKE %s ORDER BY p.id DESC"
+            curs.execute(sql, (search_word, search_word))
+    else:
+        sql = common_sql + "ORDER BY p.id DESC"
+        curs.execute(sql)
+
     posts = curs.fetchall()
     conn.close()
 
-    return render_template('index.html', posts=posts)
+    return render_template('index.html', posts=posts, keyword=keyword, search_type=search_type)
 
 
 
