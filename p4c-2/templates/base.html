@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>P4C Web-2</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}"
 </head>
 <body>
     <header>
@@ -22,7 +23,6 @@
         </nav>
     </header>
     <hr>
-
     {% with messages = get_flashed_messages() %}
         {% if messages %}
             <script>
@@ -33,9 +33,23 @@
         {% endif %}
     {% endwith %}
 
-    <main>
-        {% block content %}
-        {% endblock %}
-    </main>
+    <div class="container">
+        <div class="layout-wrapper">
+            <div class="sidebar">
+                <h3>게시판 메뉴</h3>
+                <ul>
+                    <li><a href="/" class="active">전체 게시판</a></li>
+                    <li><a href="#">공지사항</a></li>
+                    <li><a href="#">자유 게시판</a></li>
+                    <li><a href="#">질문 Q&A</a></li>
+                </ul>
+            </div>
+
+            <div class="main-content">
+                {% block content %}
+                {% endblock %}
+            </div>
+        </div>
+    </div>
 </body>
 </html>

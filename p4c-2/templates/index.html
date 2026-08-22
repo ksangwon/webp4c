@@ -2,7 +2,7 @@
 
 {% block content %}
     <div style="display: flex; justify-content: space-between; align-items: center;margin-bottom: 15px;" >
-        <h3 style="margin: 0;">게시글 목록</h3>
+        <h3 style="margin: 0;">전체 게시판</h3>
         <form action="{{ url_for('index') }}" method="GET" style="margin: 0;">
             <select name="search_type" style="padding: 5px;">
                 <option value="all" {% if search_type == 'all' %}selected{% endif %}>전체 (제목+내용)</option>
@@ -13,39 +13,46 @@
             <button type="submit" style="padding: 5px 10px;">검색</button>
         </form>
     </div>
-    <table border="1" width="600">
+    <table class="board-table">
         <thead>
             <tr>
-                <th>번호</th>
-                <th>제목</th>
-                <th>작성자</th>
-                <th>작성일</th>
-                <th>내용</th>
+                <th style="width: 10%;">번호</th>
+                <th style="width: 40%;">제목</th>
+                <th style="width: 15%;">작성자</th>
+                <th style="width: 30%;">작성일</th>
+                <th style="width: 5%;">내용</th>
             </tr>
         </thead>
         <tbody>
             {% for post in posts %}
-            <tr align="center">
-                <td>{{ loop.index }}</td>
-                <td>{{ post.title }}</td>
+            <tr>
+                <td>{{ loop.revindex }}</td>
+                <td class="title-etc"><a href="{{ url_for('read', id=post.id) }}">{{ post.title }}</a></td>
                 <td>{{ post.username }}</td>
-                <td>{{ post.created_at.strftime('%Y-%m-%d %H:%M') }}
-                    {% if post.created_at != post.updated_at %}
-                        <span style="color:gray; font-size: 0.8em;">
-                            (수정됨)
+                <td>
+                    <div class="date-wrapper">
+                        <span></span>
+                        <span class="date-text">
+                            {{ post.created_at.strftime('%Y-%m-%d %H:%M') }}
                         </span>
-                    {% endif %}
+                        {% if post.created_at != post.updated_at %}
+                            <span class="badge-modified">(수정됨)</span>
+                        {% endif %}
+                    </div>
                 </td>
-                <td><a href="{{ url_for('read', id=post.id) }}">보기</a></td>
+                <td>
+                    <a href="{{ url_for('read', id=post.id) }}">보기</a>
+                </td>
             </tr>
             {% else %}
             <tr>
-                {% if keyword %}
-                    <td colspan="5" align="center">'{{ keyword }}'에 대한 조회된 글이 없습니다.
-                    </td>
-                {% else %}
-                    <td colspan="5" align="center">아직 등록된 게시글이 없습니다.</td>
-                {% endif %}
+                <td colspan="5" align="center" style="padding: 30px;">
+                    {% if keyword %}
+                        '{{ keyword }}'에 대한 조회된 글이 없습니다.
+                    {% else %}
+                        아직 등록된 게시글이 없습니다.
+                    {% endif %}
+                </td>
             </tr>
             {% endfor %}
         </tbody>

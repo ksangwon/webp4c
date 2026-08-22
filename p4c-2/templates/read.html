@@ -20,4 +20,35 @@
             <button type="submit" style="color: red;" onclick="return confirm('정말 삭제하시겠습니까?');">글 삭제</button>
         </form>
     {% endif %}
+    
+    <hr class="section-divider">
+    <h4 class="comment-title">댓글 ({{ comments|length }})</h4>
+    <div class="comment-list">
+        {% for comment in comments %}
+            <div class="comment-item">
+                <strong>{{ comment.username }}</strong>
+                <span class="comment-date">
+                    {{ comment.created_at.strftime('%Y-%m-%d %H:%M') }}
+                </span>
+                <div class="comment-text">{{ comment.content }}</div>
+            </div>
+        {% else %}
+            <p class="comment-empty">아직 작성된 댓글이 없습니다.</p>
+        {% endfor %}
+    </div>
+
+    {% if session.get('user_id') %}
+        <form action="{{ url_for('comment') }}" method="POST" class="comment-form">
+            <input type="hidden" name="post_id" value="{{ post.id }}">
+            <div class="comment-input-group">
+                <textarea name="content" class="comment-textarea" placeholder="댓글을 입력하세요 (최대 1000자)" maxlength="1000" required></textarea>
+                <button type="submit" class="btn-submit-comment">등록</button>
+            </div>
+        </form>
+    {% else %}
+        
+        <div class="comment-login-msg">
+            댓글을 작성하려면 로그인이 필요합니다.
+        </div>
+    {% endif %}
 {% endblock %}

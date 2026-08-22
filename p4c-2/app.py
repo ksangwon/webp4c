@@ -123,6 +123,10 @@ def write():
         title = request.form['title']
         content = request.form['content']
         user_id = session['user_id']
+        if len(title) > 100:
+            return "<script>alert('제목은 100자를 초과할 수 없습니다.'); history.back();</script>"
+        elif len(content) > 5000:
+            return "<script>alert('본문은 5000자를 초과할 수 없습니다.'); history.back();</script>"
 
         conn = db_connect()
         cursor = conn.cursor()
@@ -140,20 +144,25 @@ def write():
 def read(id):
     conn = db_connect()
     cursor = conn.cursor()
-    sql = """
-        SELECT * 
+    sql_post = """
+        SELECT p.*, u.username
         FROM posts p JOIN users u ON p.user_id = u.id 
         WHERE p.id = %s
     """
-    cursor.execute(sql, (id,))
+    cursor.execute(sql_post, (id,))
     post = cursor.fetchone()
-    conn.close()
 
     if not post:
+        conn.close()
         flash("존재하지 않는 게시글입니다.")
         return redirect(url_for('index'))
 
-    return render_template('read.html', post=post)
+    sql_comments = "SELECT * FROM comments WHERE post_id = %s ORDER BY created_at ASC"
+    cursor.execute(sql_comments, (id,))
+    comments = cursor.fetchall()
+    conn.close()
+
+    return render_template('read.html', post=post, comments=comments)
 
 # 게시글 수정
 @app.route('/modify/<int:id>', methods=['GET','POST'])
@@ -176,6 +185,10 @@ def modify(id):
     if request.method == 'POST':
         title = request.form['title']
         content = request.form['content']
+        if len(title) > 100:
+            return "<script>alert('제목은 100자를 초과할 수 없습니다.'); history.back();</script>"
+        elif len(content) > 5000:
+            return "<script>alert('본문은 5000자를 초과할 수 없습니다.'); history.back();</script>"
 
         sql = "UPDATE posts SET title = %s, content = %s WHERE id = %s"
         cursor.execute(sql, (title, content, id))
@@ -232,5 +245,35 @@ def resign():
     return redirect(url_for('index'))
 
 
+# 댓글 저장
+@app.route('/comment', methods=['POST'])
+def comment():
+    if not session.get('user_id'):
+        flash('로그인이 필요한 기능입니다.')
+        return redirect(url_for('login'))
+    
+    post_id = request.form.get('post_id')
+    username = session.get('username')
+    content = request.form.get('content')
+
+    if not content or len(content.strip()) == 0:
+        flash('댓글 내용을 입력해주세요.')
+        return redirect(url_for('read', id=post_id))
+
+    if len(content) > 1000:
+        flash('댓글은 1000자를 초과할 수 없습니다.')
+        return redirect(url_for('read', id=post_id))
+
+    conn = db_connect()
+    cursor = conn.cursor()
+    sql = "INSERT INTO comments (post_id, username, content) VALUES (%s, %s, %s)"
+    cursor.execute(sql, (post_id, username, content))
+
+    conn.commit()
+    conn.close()
+
+    return redirect(url_for('read', id=post_id))
+
+
 if __name__ == '__main__':
-    app.run(port=5001, debug=True)
+    app.run(port=5001, debug=True)  
